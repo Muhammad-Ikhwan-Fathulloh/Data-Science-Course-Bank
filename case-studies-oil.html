@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data Science Minyak Dunia</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding-top: 40px; }
+    pre code { background-color: #f8f9fa; padding: 10px; display: block; }
+    h2, h3 { margin-top: 40px; }
+    .tab-content > .tab-pane { padding-top: 20px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1 class="text-center mb-4">Studi Kasus Data Science Harga Minyak Dunia</h1>
+
+  <p>Source Github:   <a href="https://github.com/Muhammad-Ikhwan-Fathulloh">Muhammad Ikhwan Fathulloh</a></p>
+  <!-- Nav Tabs -->
+  <ul class="nav nav-tabs" id="edaTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="prep-tab" data-bs-toggle="tab" data-bs-target="#prep" type="button" role="tab">Data Preparation</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="eda-tab" data-bs-toggle="tab" data-bs-target="#eda" type="button" role="tab">EDA</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="feature-tab" data-bs-toggle="tab" data-bs-target="#feature" type="button" role="tab">Feature Engineering</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="train-tab" data-bs-toggle="tab" data-bs-target="#train" type="button" role="tab">Model Training</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="valid-tab" data-bs-toggle="tab" data-bs-target="#valid" type="button" role="tab">Model Validation</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="tune-tab" data-bs-toggle="tab" data-bs-target="#tune" type="button" role="tab">Tuning & Finalize</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="links-tab" data-bs-toggle="tab" data-bs-target="#links" type="button" role="tab">Referensi</button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="edaTabsContent">
+    <div class="tab-pane fade show active" id="prep" role="tabpanel">
+        <h2>Data Preparation</h2>
+        <p><strong>Dataset:</strong> Brent Crude Oil Prices dari <code>https://github.com/datasets/oil-prices</code> berisi data historis harian harga minyak Brent sejak tahun 1987. Dataset ini digunakan untuk analisis tren harga, evaluasi pasar, serta pemodelan time series dalam sektor energi dan ekonomi global.</p>
+  
+        <h4>Struktur Dataset</h4>
+        <ul>
+          <li><strong>Date</strong>: tanggal pengambilan data (format: YYYY-MM-DD)</li>
+          <li><strong>Price</strong>: harga Brent crude oil dalam USD</li>
+        </ul>
+  
+        <h4>Langkah Persiapan</h4>
+        <ul>
+          <li>Import pustaka pandas dan baca dataset dari URL</li>
+          <li>Konversi kolom <code>Date</code> menjadi datetime untuk analisis waktu</li>
+          <li>Jadikan kolom <code>Date</code> sebagai index</li>
+          <li>Gunakan <code>dropna()</code> untuk menghapus data kosong</li>
+        </ul>
+  
+        <pre><code>
+  # Contoh kode lengkap
+  import pandas as pd
+  
+  # 1. Membaca dataset dari URL
+  df = pd.read_csv("https://raw.githubusercontent.com/datasets/oil-prices/master/data/brent-daily.csv")
+  
+  # 2. Konversi kolom Date ke format datetime
+  df['Date'] = pd.to_datetime(df['Date'])
+  
+  # 3. Set kolom Date sebagai index
+  df = df.set_index('Date')
+  
+  # 4. Hapus data kosong (jika ada)
+  df = df.dropna()
+  
+  # 5. Lihat informasi struktur data
+  df.info()
+  
+  # 6. Cek missing value
+  df.isnull().sum()
+  
+  # 7. Statistik deskriptif dasar
+  df.describe()
+  
+  # 8. Reset index jika diperlukan (mengembalikan kolom Date)
+  df.reset_index(inplace=True)
+  df.head()</code></pre>
+  
+        <h4>Penjelasan Fungsi</h4>
+        <ul>
+          <li><code>read_csv()</code>: Membaca file CSV dari URL dan menyimpannya sebagai DataFrame.</li>
+          <li><code>to_datetime()</code>: Mengonversi kolom string menjadi objek datetime agar dapat digunakan untuk analisis waktu.</li>
+          <li><code>set_index()</code>: Mengatur kolom tertentu sebagai index, penting untuk time series.</li>
+          <li><code>dropna()</code>: Menghapus baris yang memiliki nilai kosong untuk menjaga kualitas analisis.</li>
+          <li><code>info()</code>: Menampilkan jumlah kolom, baris, tipe data, dan memori yang digunakan.</li>
+          <li><code>describe()</code>: Menyediakan statistik deskriptif untuk kolom numerik.</li>
+          <li><code>reset_index()</code>: Mengembalikan index menjadi kolom biasa untuk fleksibilitas analisis.</li>
+        </ul>
+  
+        <h4>Latihan Teknis</h4>
+        <ol>
+          <li>Jalankan <code>df.info()</code> dan jelaskan apa yang Anda pahami dari hasil tersebut.</li>
+          <li>Gunakan <code>df.isnull().sum()</code> untuk mengidentifikasi apakah ada kolom kosong.</li>
+          <li>Gunakan <code>df.describe()</code> untuk memahami nilai minimum, maksimum, dan rata-rata harga minyak.</li>
+          <li>Reset index dan amati bagaimana struktur DataFrame berubah.</li>
+          <li>Ubah URL dataset menjadi file lokal atau dataset serupa lainnya, lalu ulangi langkah di atas.</li>
+        </ol>
+  
+        <p><strong>Dokumentasi Resmi:</strong><br>
+          <a href="https://pandas.pydata.org/docs/" target="_blank">Pandas Official Documentation</a>
+        </p>
+      </div>
+
+      <div class="tab-pane fade" id="eda" role="tabpanel">
+        <h2>Exploratory Data Analysis (EDA)</h2>
+        <p>EDA bertujuan untuk mengeksplorasi data agar kita memahami lebih jauh pola distribusi, outlier, tren musiman, serta potensi korelasi antar variabel. Tahap ini penting sebelum membangun model machine learning.</p>
+        <h4>Tujuan EDA:</h4>
+        <ul>
+          <li>Mengetahui ringkasan statistik deskriptif dari data</li>
+          <li>Melihat tren dan pola musiman</li>
+          <li>Mendeteksi outlier atau data ekstrem</li>
+          <li>Memvisualisasikan hubungan antar fitur</li>
+        </ul>
+  
+        <h4>Kode Contoh</h4>
+        <pre><code>
+  # Ringkasan statistik deskriptif
+  print(df.describe())
+  
+  # Lineplot tren harga minyak
+  import matplotlib.pyplot as plt
+  plt.figure(figsize=(12,5))
+  df['Price'].plot(title='Harga Minyak Harian')
+  plt.xlabel('Tanggal')
+  plt.ylabel('Harga (USD)')
+  plt.grid(True)
+  plt.show()
+  
+  # Boxplot untuk mendeteksi outlier
+  plt.figure(figsize=(6,4))
+  df.boxplot(column='Price')
+  plt.title('Boxplot Harga Minyak')
+  plt.ylabel('Harga (USD)')
+  plt.show()
+  
+  # Histogram distribusi harga
+  df['Price'].hist(bins=30, figsize=(8,5))
+  plt.title('Distribusi Harga Minyak')
+  plt.xlabel('Harga (USD)')
+  plt.ylabel('Frekuensi')
+  plt.grid(True)
+  plt.show()
+  
+  # Deteksi tanggal harga tertinggi dan terendah
+  tanggal_max = df['Price'].idxmax()
+  tanggal_min = df['Price'].idxmin()
+  harga_max = df['Price'].max()
+  harga_min = df['Price'].min()
+  print(f"Harga tertinggi: {harga_max:.2f} USD pada {tanggal_max.date()}")
+  print(f"Harga terendah: {harga_min:.2f} USD pada {tanggal_min.date()}")</code></pre>
+  
+        <h4>Penjelasan Visualisasi:</h4>
+        <ul>
+          <li><code>describe()</code>: memberikan statistik dasar seperti mean, median, std, min, dan max.</li>
+          <li><strong>Lineplot</strong>: sangat bagus untuk mendeteksi tren jangka panjang atau pola musiman seperti kenaikan musiman atau efek krisis global.</li>
+          <li><strong>Boxplot</strong>: menunjukkan sebaran data dan nilai-nilai outlier, yang penting untuk evaluasi stabilitas pasar.</li>
+          <li><strong>Histogram</strong>: menggambarkan distribusi harga secara keseluruhan, membantu mengenali apakah distribusi simetris atau miring.</li>
+          <li><strong>idxmax() / idxmin()</strong>: mengidentifikasi tanggal ekstrim (harga tertinggi/terendah), bisa dikaitkan dengan peristiwa dunia nyata.</li>
+        </ul>
+        
+        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgKFcbHzIDd08yQLGP1D6CWpcBPxjnp9CfGOupPcQIFPJVvHNLCg6Xbhl4S9O0R411qiCz5NgjN95y-IDc4dWqsvmhCcgdWUvCMo_vQDh4YRseYxgyZcrg56Mk5AH4nChlANIKrxNTE-Ls/s1200/visual.png" class="img-fluid rounded" alt="Moving Average Illustration">
+
+        <h4>Latihan Teknis</h4>
+        <ol>
+          <li>Tampilkan <code>df.describe()</code> dan tentukan nilai rata-rata dan simpangan baku harga minyak.</li>
+          <li>Buat lineplot, boxplot, dan histogram untuk <code>Price</code>.</li>
+          <li>Identifikasi tanggal dengan harga tertinggi dan terendah menggunakan <code>idxmax()</code> dan <code>idxmin()</code>, lalu bandingkan dengan peristiwa geopolitik yang mungkin berpengaruh.</li>
+          <li>Uji visualisasi untuk rentang waktu tertentu saja (misalnya 2008-2010) menggunakan slicing <code>df['2008':'2010']</code>.</li>
+        </ol>
+  
+        <p><strong>Referensi Dokumentasi:</strong> <a href="https://pandas.pydata.org/docs/" target="_blank">Pandas</a> | <a href="https://matplotlib.org/stable/contents.html" target="_blank">Matplotlib</a></p>
+      </div>
+
+      <div class="tab-pane fade" id="feature" role="tabpanel">
+        <h2>Feature Engineering</h2>
+        <p>Feature engineering adalah proses penting dalam data science yang bertujuan menciptakan fitur baru dari data mentah untuk membantu model machine learning mengenali pola yang tersembunyi. Pada data deret waktu seperti harga minyak, teknik ini sangat berguna untuk mengungkapkan tren, pola musiman (seasonality), dan dinamika harga historis.</p>
+  
+        <h4>Contoh Kode Lengkap</h4>
+        <pre><code>
+  # Muat data dan tangani nilai kosong
+  import pandas as pd
+  url = "https://raw.githubusercontent.com/datasets/oil-prices/master/data/brent-daily.csv"
+  df = pd.read_csv(url)
+  df['Date'] = pd.to_datetime(df['Date'])
+  df = df.set_index('Date')
+  
+  # Tangani nilai null untuk kolom numerik (Price)
+  df['Price'] = df['Price'].fillna(df['Price'].mean())  # Imputasi dengan rata-rata
+  
+  # Tambahkan kolom dengan nilai string yang null untuk contoh (misalnya 'Status')
+  df['Status'] = ['Aktif' if i%2==0 else None for i in range(len(df))]  # Contoh string dengan nilai null
+  df['Status'] = df['Status'].fillna('Tidak diketahui')  # Imputasi string
+  
+  # Tambahkan fitur waktu
+  df['Year'] = df.index.year
+  df['Month'] = df.index.month
+  df['DayOfWeek'] = df.index.dayofweek
+  
+  # Tambahkan rata-rata bergulir (Moving Average)
+  df['Rolling7'] = df['Price'].rolling(7).mean()
+  df['Rolling30'] = df['Price'].rolling(30).mean()</code></pre>
+  
+        <h4>Penjelasan Teori & Alasan</h4>
+        <ul>
+          <li><strong>fillna():</strong> digunakan untuk mengisi nilai kosong. Untuk data numerik seperti harga minyak, kita bisa menggunakan rata-rata (mean), median, atau interpolasi. Untuk data kategori/string, kita bisa isi dengan label seperti "Tidak diketahui" atau modus.</li>
+          <li><strong>Ekstraksi waktu:</strong> Year, Month, dan DayOfWeek membantu mengidentifikasi pengaruh musiman terhadap harga minyak.</li>
+          <li><strong>Moving Average:</strong> Meratakan fluktuasi harga harian sehingga tren harga lebih mudah terlihat.</li>
+        </ul>
+  
+        <h4>Visualisasi Tren Harga & Fitur</h4>
+        <pre><code>
+  import matplotlib.pyplot as plt
+  plt.figure(figsize=(12,6))
+  df['Price'].plot(label='Harga Harian', alpha=0.5)
+  df['Rolling7'].plot(label='Rata-rata 7 Hari', linewidth=2)
+  df['Rolling30'].plot(label='Rata-rata 30 Hari', linewidth=2)
+  plt.title('Harga Minyak & Moving Average')
+  plt.xlabel('Tanggal')
+  plt.ylabel('Harga (USD)')
+  plt.legend()
+  plt.grid(True)
+  plt.show()</code></pre>
+  
+        <h4>Ilustrasi</h4>
+        <p>Moving Average membantu mengenali tren seperti:</p>
+        <ul>
+          <li>Kenaikan stabil harga (bullish trend)</li>
+          <li>Penurunan berkelanjutan (bearish trend)</li>
+          <li>Perpotongan antar MA (death cross/golden cross)</li>
+        </ul>
+        <img src="https://scanz.com/wp-content/uploads/2018/12/movingaveragelag-1.jpg" class="img-fluid rounded" alt="Moving Average Illustration">
+  
+        <h4>Latihan Teknis</h4>
+        <ol>
+          <li>Tambahkan fitur <code>WeekOfYear</code> dan <code>Quarter</code> dari indeks tanggal.</li>
+          <li>Buat fitur baru <code>Rolling90</code> dan bandingkan visualnya dengan <code>Rolling30</code>.</li>
+          <li>Gunakan <code>groupby('Month')</code> untuk menghitung rata-rata harga bulanan, lalu tampilkan grafiknya.</li>
+          <li>Hitung korelasi antara <code>Rolling30</code> dan <code>Price</code> menggunakan <code>df.corr()</code> dan interpretasikan nilainya.</li>
+          <li>Buat kolom string <code>Periode</code> berdasarkan <code>Year</code> dengan format 'Q1-2023' dsb dan analisis agregasi berdasarkan itu.</li>
+        </ol>
+  
+        <p><strong>Referensi:</strong> <a href="https://pandas.pydata.org/docs/" target="_blank">Pandas</a>, <a href="https://matplotlib.org/stable/contents.html" target="_blank">Matplotlib</a></p>
+      </div>
+
+      <div class="tab-pane fade show active" id="train" role="tabpanel">
+        <h2>Model Training</h2>
+
+        <h4>Jenis-Jenis Model Machine Learning</h4>
+        <ul>
+          <li><strong>Klasifikasi:</strong> Target adalah label diskrit, misal: spam/tidak.</li>
+          <li><strong>Regresi:</strong> Target berupa angka kontinu, seperti harga atau suhu.</li>
+          <li><strong>Clustering:</strong> Mengelompokkan data tanpa label, seperti segmen pelanggan.</li>
+        </ul>
+  
+        <h4>Ilustrasi Model</h4>
+        <img src="https://imam.mercubuana-yogya.ac.id/wp-content/uploads/2024/11/img.197Jenis-jenis-utama-Machine-Learning-Pembelajaran-Mesin.jpg" class="img-fluid rounded" alt="Model ML">
+  
+        <p>Pada tahap ini, kita akan melatih model prediksi menggunakan teknik regresi. Regresi dipilih karena variabel target kita berupa angka kontinu, yaitu harga minyak per hari.</p>
+  
+        <p><strong>Linear Regression</strong> digunakan ketika hubungan antara fitur dan target cenderung linier. Sebaliknya, <strong>Random Forest Regressor</strong> cocok untuk pola data kompleks dan non-linier.</p>
+  
+        <p>Sebelum memulai pelatihan, penting untuk memisahkan data menjadi data pelatihan dan pengujian untuk menghindari <em>data leakage</em>. Teknik ini dilakukan dengan <code>train_test_split()</code>.</p>
+  
+        <h4>Contoh Kode: Pemisahan dan Pelatihan</h4>
+        <pre><code>
+  from sklearn.model_selection import train_test_split
+  from sklearn.linear_model import LinearRegression
+  from sklearn.ensemble import RandomForestRegressor
+  
+  # Fitur input dan target
+  X = df[['Year', 'Month']]
+  y = df['Price']
+  
+  # Split data: 80% latih, 20% uji
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+  
+  # Melatih model Linear Regression
+  model_lr = LinearRegression()
+  model_lr.fit(X_train, y_train)
+  
+  # Melatih model Random Forest
+  model_rf = RandomForestRegressor(random_state=42)
+  model_rf.fit(X_train, y_train)</code></pre>
+
+        <h4>Latihan Teknis</h4>
+        <ol>
+          <li>Tambahkan fitur baru: <code>DayOfWeek = df.index.dayofweek</code>. Ubah <code>X</code> menjadi <code>["Year", "Month", "DayOfWeek"]</code>.</li>
+          <li>Gunakan <code>from sklearn.metrics import r2_score</code> dan tampilkan skor R2 pada data uji dari kedua model.</li>
+          <li>Ubah <code>test_size</code> menjadi 0.3 dan bandingkan akurasi.</li>
+          <li>Buat grafik: <code>plt.scatter(y_test, y_pred)</code> untuk melihat kecocokan prediksi dengan nilai aktual.</li>
+        </ol>
+  
+        <p><strong>Dokumentasi Referensi:</strong> <a href="https://scikit-learn.org/stable/modules/linear_model.html" target="_blank">Linear Regression</a>, <a href="https://scikit-learn.org/stable/modules/ensemble.html#random-forests" target="_blank">Random Forest</a></p>
+      </div>
+
+      <div class="tab-pane fade" id="valid" role="tabpanel">
+        <h2>Model Validation</h2>
+        <p>Validasi model bertujuan untuk mengevaluasi seberapa baik model memprediksi data yang belum pernah dilihat sebelumnya. Dua metrik umum untuk regresi adalah:</p>
+        <ul>
+          <li><strong>R² (R-squared):</strong> Mengukur proporsi variansi target yang dapat dijelaskan oleh fitur. Nilai mendekati 1 berarti model sangat baik.</li>
+          <li><strong>Mean Squared Error (MSE):</strong> Rata-rata kuadrat dari error antara prediksi dan nilai asli. Nilai lebih kecil lebih baik.</li>
+        </ul>
+        <p>Referensi mendalam tentang metrik evaluasi regresi: <a href="https://mdtahseen278.medium.com/mastering-regression-evaluation-metrics-a-comprehensive-guide-to-measuring-model-performance-05924b0b54a2" target="_blank">Mastering Regression Evaluation Metrics</a></p>
+        <h4>Contoh Kode Evaluasi</h4>
+        <pre><code>from sklearn.metrics import mean_squared_error, r2_score
+      
+      # Prediksi menggunakan data uji
+      pred_lr = model_lr.predict(X_test)
+      pred_rf = model_rf.predict(X_test)
+      
+      # Evaluasi Linear Regression
+      print("Linear Regression")
+      print("R2 Score:", r2_score(y_test, pred_lr))
+      print("MSE:", mean_squared_error(y_test, pred_lr))
+      
+      # Evaluasi Random Forest
+      print("Random Forest")
+      print("R2 Score:", r2_score(y_test, pred_rf))
+      print("MSE:", mean_squared_error(y_test, pred_rf))</code></pre>
+      
+        <h4>Visualisasi Hasil Prediksi</h4>
+        <p>Gunakan <code>matplotlib</code> untuk membandingkan nilai prediksi dan aktual:</p>
+        <pre><code>import matplotlib.pyplot as plt
+      
+      plt.figure(figsize=(10,5))
+      plt.scatter(y_test, pred_rf, alpha=0.5, label='Random Forest')
+      plt.scatter(y_test, pred_lr, alpha=0.5, label='Linear Regression', color='orange')
+      plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
+      plt.xlabel("Nilai Aktual")
+      plt.ylabel("Prediksi")
+      plt.title("Perbandingan Prediksi vs Aktual")
+      plt.legend()
+      plt.grid(True)
+      plt.show()</code></pre>
+      
+        <h4>Penjelasan Tambahan</h4>
+        <ul>
+          <li><strong>R2 Score</strong> = 1 artinya model menjelaskan 100% variasi dari data target. Jika negatif, model sangat buruk.</li>
+          <li><strong>MSE</strong> sensitif terhadap outlier karena kuadrat dari error diperhitungkan. Cocok saat outlier perlu diperhatikan.</li>
+          <li><strong>MAE (Mean Absolute Error)</strong> lebih robust terhadap outlier dibanding MSE.</li>
+          <li>Visualisasi seperti <code>scatter plot</code> membantu melihat seberapa dekat prediksi dengan nilai aktual.</li>
+        </ul>
+      
+        <h4>Latihan Teknis</h4>
+        <ol>
+          <li>Hitung <code>mean_absolute_error</code> menggunakan <code>from sklearn.metrics import mean_absolute_error</code>.</li>
+          <li>Ubah model regresi menjadi <code>DecisionTreeRegressor</code> dan bandingkan akurasi.</li>
+          <li>Gunakan <code>plt.hist()</code> untuk melihat distribusi error dari salah satu model.</li>
+          <li>Ubah rasio <code>train_test_split</code> menjadi 0.5 dan amati perubahan skor R².</li>
+        </ol>
+        <p><strong>Dokumentasi Referensi:</strong>
+          <a href="https://scikit-learn.org/stable/modules/model_evaluation.html" target="_blank">Evaluasi Model Sklearn</a></p>
+      </div>
+      
+
+    <div class="tab-pane fade" id="tune" role="tabpanel">
+        <h2>Tuning & Finalize</h2>
+        <p>Pada tahap ini, kita melakukan penyempurnaan terhadap model dengan memilih parameter terbaik (hyperparameter tuning) dan menyimpannya agar bisa digunakan kembali.</p>
+  
+        <h4>1. Apa itu Hyperparameter?</h4>
+        <p>Hyperparameter adalah parameter yang ditentukan sebelum proses training, seperti <code>n_estimators</code> dan <code>max_depth</code> pada Random Forest. Penentuan nilai ini sangat mempengaruhi akurasi dan performa model.</p>
+  
+        <h4>2. Cara Menentukan Parameter</h4>
+        <p>Beberapa pendekatan yang bisa digunakan:
+          <ul>
+            <li><strong>Trial & Error:</strong> Menentukan nilai manual dan uji performa.</li>
+            <li><strong>Grid Search:</strong> Mencoba semua kombinasi nilai yang ditentukan dalam grid.</li>
+            <li><strong>Random Search:</strong> Mencoba kombinasi acak untuk efisiensi waktu.</li>
+          </ul>
+        </p>
+  
+        <h4>Contoh: Tuning Random Forest dengan GridSearchCV</h4>
+        <pre><code>
+  from sklearn.model_selection import GridSearchCV
+  from sklearn.ensemble import RandomForestRegressor
+  
+  param_grid = {
+      'n_estimators': [50, 100, 150],
+      'max_depth': [None, 5, 10],
+      'min_samples_split': [2, 5]
+  }
+  
+  gs = GridSearchCV(RandomForestRegressor(), param_grid, cv=5)
+  gs.fit(X_train, y_train)
+  print("Best Params:", gs.best_params_)</code></pre>
+  
+        <h4>3. Menyimpan Model</h4>
+        <p>Setelah mendapatkan model terbaik, kita bisa menyimpannya dengan <code>joblib</code>:</p>
+        <pre><code>
+  import joblib
+  joblib.dump(gs.best_estimator_, "model_rf_best.pkl")</code></pre>
+  
+        <h4>4. Memuat dan Menggunakan Kembali Model</h4>
+        <pre><code>
+  model_loaded = joblib.load("model_rf_best.pkl")
+  prediksi = model_loaded.predict(X_test)</code></pre>
+  
+        <h4>Latihan Teknis</h4>
+        <ol>
+          <li>Modifikasi <code>param_grid</code> untuk mencoba parameter <code>min_samples_leaf</code>.</li>
+          <li>Simpan model Linear Regression ke dalam file joblib.</li>
+          <li>Gunakan model yang disimpan untuk memprediksi nilai baru dan bandingkan akurasinya.</li>
+        </ol>
+  
+        <p><strong>Referensi:</strong> 
+          <a href="https://scikit-learn.org/stable/modules/grid_search.html" target="_blank">Dokumentasi GridSearchCV</a> | 
+          <a href="https://scikit-learn.org/stable/modules/model_persistence.html" target="_blank">Penyimpanan Model Sklearn</a>
+        </p>
+    </div>
+
+    <div class="tab-pane fade" id="links" role="tabpanel">
+        <h2>Referensi & Dokumentasi</h2>
+        <ul>
+          <li><a href="https://pandas.pydata.org/docs/" target="_blank">Pandas Documentation</a> – manipulasi data dan analisis struktur tabel.</li>
+          <li><a href="https://matplotlib.org/stable/" target="_blank">Matplotlib Guide</a> – visualisasi grafik dan data plotting.</li>
+          <li><a href="https://seaborn.pydata.org/" target="_blank">Seaborn Documentation</a> – grafik statistik berbasis matplotlib.</li>
+          <li><a href="https://scikit-learn.org/stable/" target="_blank">Scikit-learn Reference</a> – dokumentasi lengkap untuk model ML.</li>
+          <li><a href="https://joblib.readthedocs.io/en/latest/" target="_blank">Joblib Documentation</a> – penyimpanan dan pemanggilan model.</li>
+          <li><a href="https://github.com/datasets/oil-prices" target="_blank">Oil Prices Dataset (GitHub)</a> – sumber data harga minyak mentah harian.</li>
+          <li><a href="https://numpy.org/doc/" target="_blank">NumPy Documentation</a> – operasi matematis pada array dan numeric tools.</li>
+        </ul>
+      </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

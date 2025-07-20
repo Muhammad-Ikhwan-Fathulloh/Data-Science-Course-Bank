@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Studi Kasus Clustering</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding-top: 40px; }
+    pre code { background-color: #f8f9fa; padding: 10px; display: block; }
+    h2, h3 { margin-top: 40px; }
+    .tab-content > .tab-pane { padding-top: 20px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1 class="text-center mb-4">Studi Kasus Clustering Pelanggan Mall</h1>
+  <ul class="nav nav-tabs" id="tabsClustering" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#prep">Data Preparation</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#eda">EDA</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#feature">Feature Engineering</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#train">Model Training</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#valid">Model Evaluation</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tune">Tuning & Finalize</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#links">Referensi</button></li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="prep">
+      <h2>Data Preparation</h2>
+      <p>Dataset <strong>Mall Customers</strong> berisi informasi pelanggan, seperti usia, pendapatan tahunan, dan skor pengeluaran. Dataset ini digunakan untuk mengelompokkan pelanggan berdasarkan kemiripan karakteristik belanja.</p>
+      <ul>
+        <li><strong>CustomerID</strong>: ID pelanggan</li>
+        <li><strong>Gender</strong>: Jenis kelamin</li>
+        <li><strong>Age</strong>: Usia</li>
+        <li><strong>Annual Income (k$)</strong>: Pendapatan tahunan dalam ribuan dolar</li>
+        <li><strong>Spending Score</strong>: Skor belanja (1-100)</li>
+      </ul>
+      <pre><code>import pandas as pd
+
+# Load data
+url = "https://raw.githubusercontent.com/sharmaroshan/Mall-Customer-Segmentation-Dataset/master/Mall_Customers.csv"
+df = pd.read_csv(url)
+df.columns = df.columns.str.strip()
+print(df.head())</code></pre>
+    </div>
+
+    <div class="tab-pane fade" id="eda">
+      <h2>Exploratory Data Analysis (EDA)</h2>
+      <pre><code>import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.histplot(df['Age'], kde=True)
+plt.title("Distribusi Usia")
+plt.show()
+
+sns.scatterplot(x='Annual Income (k$)', y='Spending Score (1-100)', hue='Gender', data=df)
+plt.title("Pendapatan vs Skor Belanja")
+plt.show()</code></pre>
+      <p>Visualisasi scatter menunjukkan ada kelompok pelanggan berdasarkan pola pendapatan dan skor belanja.</p>
+    </div>
+
+    <div class="tab-pane fade" id="feature">
+      <h2>Feature Engineering</h2>
+      <ul>
+        <li>Konversi <code>Gender</code> menjadi numerik (0=Female, 1=Male)</li>
+        <li>Gunakan kolom <code>Annual Income</code> dan <code>Spending Score</code> untuk clustering</li>
+      </ul>
+      <pre><code>from sklearn.preprocessing import LabelEncoder
+
+le = LabelEncoder()
+df['Gender'] = le.fit_transform(df['Gender'])
+X = df[['Annual Income (k$)', 'Spending Score (1-100)']]</code></pre>
+    </div>
+
+    <div class="tab-pane fade" id="train">
+      <h2>Model Training (K-Means)</h2>
+      <pre><code>from sklearn.cluster import KMeans
+
+# Menentukan jumlah cluster optimal dengan Elbow Method
+inertia = []
+for k in range(1, 11):
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(X)
+    inertia.append(kmeans.inertia_)
+
+plt.plot(range(1, 11), inertia, marker='o')
+plt.xlabel("Jumlah Cluster")
+plt.ylabel("Inertia")
+plt.title("Elbow Method")
+plt.show()
+
+# Pelatihan akhir
+kmeans = KMeans(n_clusters=5, random_state=42)
+df['Cluster'] = kmeans.fit_predict(X)</code></pre>
+    </div>
+
+    <div class="tab-pane fade" id="valid">
+      <h2>Model Evaluation & Visualisasi</h2>
+      <pre><code>plt.figure(figsize=(8,6))
+sns.scatterplot(x='Annual Income (k$)', y='Spending Score (1-100)', hue='Cluster', palette='tab10', data=df)
+plt.title("Segmentasi Pelanggan berdasarkan Cluster")
+plt.show()</code></pre>
+      <p>Visualisasi ini menunjukkan pembagian pelanggan menjadi beberapa segmen berdasarkan pengelompokan K-Means.</p>
+    </div>
+
+    <div class="tab-pane fade" id="tune">
+        <h2>Tuning & Finalisasi</h2>
+        <p>Untuk meningkatkan hasil clustering, kita dapat menggunakan metrik seperti <code>Silhouette Score</code> untuk menentukan jumlah cluster terbaik secara objektif:</p>
+        <pre><code>from sklearn.metrics import silhouette_score
+  
+  for k in range(2, 11):
+      model = KMeans(n_clusters=k, random_state=42)
+      labels = model.fit_predict(X)
+      score = silhouette_score(X, labels)
+      print(f"k={k}, Silhouette Score={score:.4f}")</code></pre>
+        <p>Nilai tertinggi dari silhouette score menandakan jumlah cluster terbaik. Umumnya antara 0.5–0.7 dianggap cukup baik.</p>
+  
+        <h3>Menyimpan dan Memuat Model</h3>
+        <p>Setelah model terbaik diperoleh, simpan model untuk penggunaan berikutnya.</p>
+        <pre><code>import joblib
+  
+  # Simpan model
+  joblib.dump(kmeans, "model_kmeans.pkl")
+  
+  # Load model kembali
+  loaded_model = joblib.load("model_kmeans.pkl")
+  labels = loaded_model.predict(X)</code></pre>
+  
+        <h4>Latihan Teknis</h4>
+        <ol>
+          <li>Gunakan fitur tambahan seperti <code>Age</code> dalam clustering dan hitung ulang silhouette score.</li>
+          <li>Eksperimen dengan algoritma lain seperti DBSCAN atau AgglomerativeClustering.</li>
+          <li>Visualisasikan pusat cluster dengan menampilkan <code>kmeans.cluster_centers_</code>.</li>
+          <li>Simpan hasil akhir cluster dalam file <code>.csv</code> dengan <code>df.to_csv("hasil_cluster.csv")</code>.</li>
+        </ol>
+      </div>
+      
+    <div class="tab-pane fade" id="links">
+      <h2>Referensi & Dokumentasi</h2>
+      <ul>
+        <li><a href="https://scikit-learn.org/stable/modules/clustering.html#k-means" target="_blank">KMeans - Scikit Learn</a></li>
+        <li><a href="https://seaborn.pydata.org/" target="_blank">Seaborn Dokumentasi</a></li>
+        <li><a href="https://pandas.pydata.org/docs/" target="_blank">Pandas Documentation</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

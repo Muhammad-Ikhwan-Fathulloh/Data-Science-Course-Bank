@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Studi Kasus Klasifikasi Data Science</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding-top: 40px; }
+    pre code { background-color: #f8f9fa; padding: 10px; display: block; }
+    h2, h3 { margin-top: 40px; }
+    .tab-content > .tab-pane { padding-top: 20px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1 class="text-center mb-4">Studi Kasus Data Science: Klasifikasi Penyakit Diabetes</h1>
+
+  <p>Source Dataset: <a href="https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database">Pima Indians Diabetes Database (Kaggle)</a></p>
+  <ul class="nav nav-tabs" id="edaTabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#prep">Data Preparation</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#eda">EDA</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#feature">Feature Engineering</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#train">Model Training</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#valid">Model Validation</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tune">Tuning & Finalize</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#links">Referensi</button></li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="prep">
+      <h2>Data Preparation</h2>
+      <p>Dataset berisi informasi medis dan apakah pasien terdiagnosis diabetes (1) atau tidak (0).</p>
+      <pre><code>import pandas as pd
+url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
+col_names = ["Pregnancies", "Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI", "DiabetesPedigreeFunction", "Age", "Outcome"]
+df = pd.read_csv(url, names=col_names)
+df.info()</code></pre>
+    </div>
+
+    <div class="tab-pane fade" id="eda">
+      <h2>Exploratory Data Analysis</h2>
+      <p>Analisis distribusi, korelasi, dan outlier dari data.</p>
+      <pre><code>import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.countplot(x='Outcome', data=df)
+sns.heatmap(df.corr(), annot=True)
+df.describe()</code></pre>
+    </div>
+
+    <div class="tab-pane fade" id="feature">
+      <h2>Feature Engineering</h2>
+      <ul>
+        <li>Ganti nilai 0 pada kolom medis tertentu dengan NaN lalu imputasi median</li>
+        <li>Standardisasi nilai menggunakan <code>StandardScaler</code></li>
+      </ul>
+      <pre><code>from sklearn.preprocessing import StandardScaler
+import numpy as np
+
+for col in ["Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI"]:
+    df[col] = df[col].replace(0, np.nan)
+    df[col] = df[col].fillna(df[col].median())
+
+scaler = StandardScaler()
+df_scaled = pd.DataFrame(scaler.fit_transform(df.drop('Outcome', axis=1)), columns=df.columns[:-1])
+df_scaled['Outcome'] = df['Outcome']</code></pre>
+    </div>
+
+    <div class="tab-pane fade" id="train">
+      <h2>Model Training</h2>
+      <pre><code>from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+
+X = df_scaled.drop("Outcome", axis=1)
+y = df_scaled["Outcome"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model_lr = LogisticRegression()
+model_lr.fit(X_train, y_train)
+
+model_rf = RandomForestClassifier()
+model_rf.fit(X_train, y_train)</code></pre>
+    </div>
+
+    <div class="tab-pane fade" id="valid">
+      <h2>Model Validation</h2>
+      <p>Gunakan metrik klasifikasi seperti akurasi, precision, recall, F1, dan confusion matrix.</p>
+      <pre><code>from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+pred_lr = model_lr.predict(X_test)
+pred_rf = model_rf.predict(X_test)
+
+print("Logistic Regression")
+print(classification_report(y_test, pred_lr))
+
+print("Random Forest")
+print(classification_report(y_test, pred_rf))</code></pre>
+    </div>
+
+    <div class="tab-pane fade" id="tune">
+      <h2>Tuning & Finalize</h2>
+      <pre><code>from sklearn.model_selection import GridSearchCV
+params = {'n_estimators': [50, 100], 'max_depth': [5, 10]}
+gs = GridSearchCV(RandomForestClassifier(), params, cv=5)
+gs.fit(X_train, y_train)
+print(gs.best_params_)</code></pre>
+      <pre><code>import joblib
+joblib.dump(gs.best_estimator_, 'model_diabetes.pkl')</code></pre>
+    </div>
+
+    <div class="tab-pane fade" id="links">
+      <h2>Referensi</h2>
+      <ul>
+        <li><a href="https://scikit-learn.org/stable/">Scikit-learn</a></li>
+        <li><a href="https://seaborn.pydata.org/">Seaborn</a></li>
+        <li><a href="https://matplotlib.org/">Matplotlib</a></li>
+        <li><a href="https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database">Dataset Kaggle</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
